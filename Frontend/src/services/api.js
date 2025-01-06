@@ -6,8 +6,9 @@ export const uploadFile = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
 
-    try {
+    try {        
         const response = await axios.post(`${BASE_URL}/api/preprocess/`, formData, {
+            responseType: 'blob',
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         return response.data;

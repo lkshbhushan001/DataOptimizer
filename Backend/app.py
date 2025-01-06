@@ -4,9 +4,8 @@ from Backend.routes.preprocess import preprocess_blueprint
 from Backend.routes.datasets import datasets_blueprint
 
 app = Flask(__name__)
-CORS(app)  # Enable Cross-Origin Resource Sharing
+CORS(app)
 
-# Register Blueprints
 app.register_blueprint(preprocess_blueprint, url_prefix='/api/preprocess')
 app.register_blueprint(datasets_blueprint, url_prefix='/api/datasets')
 

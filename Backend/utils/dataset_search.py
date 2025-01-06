@@ -1,5 +1,5 @@
 def search_datasets(query):
-    # Simulated dataset metadata
+    
     datasets = [
         {"name": "Energy Consumption Data", "tags": ["energy", "time series"], "link": "http://example.com"},
         {"name": "Retail Sales Data", "tags": ["retail", "sales", "time series"], "link": "http://example.com"}
