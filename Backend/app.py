@@ -8,6 +8,7 @@ CORS(app)
 
 app.register_blueprint(preprocess_blueprint, url_prefix='/api/preprocess')
 app.register_blueprint(datasets_blueprint, url_prefix='/api/datasets')
+#app.register_blueprint(preprocess_blueprint, url_prefix='/api/get_columns')
 
 @app.route('/')
 def home():
