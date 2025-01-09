@@ -1,0 +1,138 @@
+# Removing duplicates:
+To remove duplicate rows in a DataFrame, use the `drop_duplicates` method. This ensures that each row is unique based on all or specific columns.
+
+Example:
+df.drop_duplicates(inplace=True)
+
+---
+
+# Handling missing values:
+Missing values can be handled by filling them with a default value, mean, median, or mode, or by removing rows or columns with missing values.
+
+Example 1: Fill missing values in all numerical columns with the mean:
+df.fillna(df.mean(), inplace=True)
+
+Example 2: Fill missing categorical values with the most frequent value (mode):
+df['column_name'].fillna(df['column_name'].mode()[0], inplace=True)
+
+Example 3: Remove rows where any column has a missing value:
+df.dropna(how='any', inplace=True)
+
+---
+
+# Standardizing numerical columns:
+Standardization scales the data to have a mean of 0 and a standard deviation of 1. Use the `StandardScaler` from scikit-learn for this task.
+
+Example:
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+df[columns] = scaler.fit_transform(df[columns])
+
+---
+
+# Normalizing numerical columns:
+Normalization scales values to a specific range, such as 0 to 1. Use `MinMaxScaler` for this task.
+
+Example:
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
+df[columns] = scaler.fit_transform(df[columns])
+
+---
+
+# Binning numerical data:
+Bin continuous numerical data into discrete categories or ranges to simplify analysis.
+
+Example: Divide a numerical column into five bins with labels:
+bins = [0, 10, 20, 30, 40, 50]
+labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High']
+df['binned_column'] = pd.cut(df['column_name'], bins=bins, labels=labels)
+
+---
+
+# Encoding categorical variables:
+Categorical variables can be converted to numerical formats using one-hot encoding or label encoding.
+
+Example 1: One-hot encoding:
+df = pd.get_dummies(df, columns=['categorical_column'])
+
+Example 2: Label encoding:
+from sklearn.preprocessing import LabelEncoder
+encoder = LabelEncoder()
+df['encoded_column'] = encoder.fit_transform(df['categorical_column'])
+
+---
+
+# Removing outliers:
+Outliers can be removed using statistical methods like IQR or z-scores.
+
+Example 1: IQR method:
+Q1 = df['column_name'].quantile(0.25)
+Q3 = df['column_name'].quantile(0.75)
+IQR = Q3 - Q1
+df = df[(df['column_name'] >= Q1 - 1.5 * IQR) & (df['column_name'] <= Q3 + 1.5 * IQR)]
+
+Example 2: Remove rows where z-score exceeds 3:
+from scipy.stats import zscore
+df = df[(zscore(df['column_name']) < 3)]
+
+---
+
+# Converting data types:
+Convert columns to appropriate data types like datetime, integer, or float for better processing.
+
+Example 1: Convert a column to datetime:
+df['date_column'] = pd.to_datetime(df['date_column'])
+
+Example 2: Convert a column to integer:
+df['int_column'] = df['int_column'].astype(int)
+
+Example 3: Convert a column to float:
+df['float_column'] = df['float_column'].astype(float)
+
+---
+
+# Feature engineering:
+Create new features by combining or extracting information from existing ones.
+
+Example 1: Create a new feature by multiplying two columns:
+df['new_feature'] = df['column1'] * df['column2']
+
+Example 2: Extract year, month, and day from a datetime column:
+df['year'] = df['date_column'].dt.year
+df['month'] = df['date_column'].dt.month
+df['day'] = df['date_column'].dt.day
+
+---
+
+# Removing unwanted columns:
+Unnecessary columns can be dropped to clean the dataset.
+
+Example:
+columns_to_remove = ['column_to_remove1', 'column_to_remove2']
+df.drop(columns=columns_to_remove, inplace=True)
+
+---
+
+# Sorting data:
+Sort rows by the values of a specific column.
+
+Example:
+df.sort_values(by='column_name', ascending=True, inplace=True)
+
+---
+
+# Aggregating data:
+Group data by a column and apply an aggregate function.
+
+Example: Group by a column and calculate the mean:
+grouped_df = df.groupby('group_column')['value_column'].mean().reset_index()
+
+---
+
+# Splitting data:
+Split the dataset into training and testing sets for machine learning.
+
+Example:
+from sklearn.model_selection import train_test_split
+train_df, test_df = train_test_split(df, test_size=0.2, random_state=42)

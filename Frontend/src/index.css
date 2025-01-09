@@ -1,12 +1,80 @@
-
+/* General body styling */
 body {
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f9;
     margin: 0;
     padding: 0;
-    background-color: #742fb4;
 }
 
-.App {
+
+
+/* Headers */
+h2 {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 20px;
     text-align: center;
-    padding: 20px;
+}
+
+h3 {
+    font-size: 1.2em;
+    color: #444;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* File input styling */
+input[type="file"] {
+    display: block;
+    margin: 15px 0;
+    padding: 10px;
+    font-size: 0.9em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+/* Labels and checkboxes */
+label {
+    font-size: 0.95em;
+    margin-right: 15px;
+    color: #555;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    margin-right: 5px;
+    accent-color: #007bff;
+}
+
+
+/* Buttons */
+button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Scrollable column container */
+div.columns {
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }

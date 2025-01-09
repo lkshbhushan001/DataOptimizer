@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from Backend.utils.dataset_search import search_datasets
+from utils.dataset_search import search_datasets
 
 datasets_blueprint = Blueprint('datasets', __name__)
 

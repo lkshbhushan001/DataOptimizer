@@ -40,12 +40,12 @@ def preprocess_pipeline(df, config):
     if config.get("normalize"):
         if config["normalize"]["method"] != "none":
             method = config["normalize"]["method"]
-            col = len(config["normalize"]["columns"])        
-            # Check if columns list is empty
-            if col != 0:
-                columns = config["normalize"].get("columns", df.select_dtypes(include=['float64', 'int64']).columns)            
-            else:
-                columns = df.select_dtypes(include=['float64', 'int64']).columns
+            # col = len(config["normalize"]["columns"])        
+            # # Check if columns list is empty
+            # if col != 0:
+            #     columns = config["normalize"].get("columns", df.select_dtypes(include=['float64', 'int64']).columns)            
+            # else:
+            columns = df.select_dtypes(include=['float64', 'int64']).columns
 
             if method == "minmax":
                 scaler = MinMaxScaler()
@@ -60,13 +60,13 @@ def preprocess_pipeline(df, config):
         if config["remove_outliers"]["method"] != "none":
             method = config["remove_outliers"]["method"]
             contamination = config["remove_outliers"].get("contamination", 0.1)
-            col = len(config["remove_outliers"]["columns"])        
+            # col = len(config["remove_outliers"]["columns"])        
             
-            if col != 0:
-                columns = config["remove_outliers"].get("columns", df.select_dtypes(include=['float64', 'int64']).columns)
+            # if col != 0:
+            #     columns = config["remove_outliers"].get("columns", df.select_dtypes(include=['float64', 'int64']).columns)
                 
-            else:
-                columns = df.select_dtypes(include=['float64', 'int64']).columns
+            # else:
+            columns = df.select_dtypes(include=['float64', 'int64']).columns
 
             if method == "iqr":
                 for col in columns:

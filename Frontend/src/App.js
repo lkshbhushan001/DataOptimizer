@@ -4,8 +4,7 @@ import DatasetRecommendation from './components/DatasetRecommendation';
 
 function App() {
     return (
-        <div className="App">
-            <h1>Data Cleaner Tool</h1>
+        <div className="App">            
             <FileUpload />
             <hr />
             <DatasetRecommendation />
