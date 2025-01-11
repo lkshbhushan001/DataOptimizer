@@ -10,10 +10,12 @@ df.drop_duplicates(inplace=True)
 Missing values can be handled by filling them with a default value, mean, median, or mode, or by removing rows or columns with missing values.
 
 Example 1: Fill missing values in all numerical columns with the mean:
-df.fillna(df.mean(), inplace=True)
+numerical_columns = df.select_dtypes(include=[np.number]).columns
+df[numerical_columns] = df[numerical_columns].apply(lambda col: col.fillna(col.mean()))
 
 Example 2: Fill missing categorical values with the most frequent value (mode):
-df['column_name'].fillna(df['column_name'].mode()[0], inplace=True)
+categorical_columns = df.select_dtypes(include=['object', 'category']).columns
+df[categorical_columns] = df[categorical_columns].apply(lambda col: col.fillna(col.mode()[0]))
 
 Example 3: Remove rows where any column has a missing value:
 df.dropna(how='any', inplace=True)
@@ -25,8 +27,9 @@ Standardization scales the data to have a mean of 0 and a standard deviation of 
 
 Example:
 from sklearn.preprocessing import StandardScaler
+numerical_columns = df.select_dtypes(include=[np.number]).columns
 scaler = StandardScaler()
-df[columns] = scaler.fit_transform(df[columns])
+df[numerical_columns] = scaler.fit_transform(df[numerical_columns])
 
 ---
 
@@ -35,8 +38,9 @@ Normalization scales values to a specific range, such as 0 to 1. Use `MinMaxScal
 
 Example:
 from sklearn.preprocessing import MinMaxScaler
+numerical_columns = df.select_dtypes(include=[np.number]).columns
 scaler = MinMaxScaler()
-df[columns] = scaler.fit_transform(df[columns])
+df[numerical_columns] = scaler.fit_transform(df[numerical_columns])
 
 ---
 
@@ -44,9 +48,11 @@ df[columns] = scaler.fit_transform(df[columns])
 Bin continuous numerical data into discrete categories or ranges to simplify analysis.
 
 Example: Divide a numerical column into five bins with labels:
-bins = [0, 10, 20, 30, 40, 50]
+numerical_columns = df.select_dtypes(include=[np.number]).columns
+bins = [0, 0.2, 0.4, 0.6, 0.8, 1]  # Assuming normalized range [0, 1]
 labels = ['Very Low', 'Low', 'Medium', 'High', 'Very High']
-df['binned_column'] = pd.cut(df['column_name'], bins=bins, labels=labels)
+for col in numerical_columns:
+    df[f'binned_{col}'] = pd.cut(df[col], bins=bins, labels=labels)
 
 ---
 
@@ -54,12 +60,15 @@ df['binned_column'] = pd.cut(df['column_name'], bins=bins, labels=labels)
 Categorical variables can be converted to numerical formats using one-hot encoding or label encoding.
 
 Example 1: One-hot encoding:
-df = pd.get_dummies(df, columns=['categorical_column'])
+categorical_columns = df.select_dtypes(include=['object', 'category']).columns
+df = pd.get_dummies(df, columns=categorical_columns)
 
 Example 2: Label encoding:
 from sklearn.preprocessing import LabelEncoder
+categorical_columns = df.select_dtypes(include=['object', 'category']).columns
 encoder = LabelEncoder()
-df['encoded_column'] = encoder.fit_transform(df['categorical_column'])
+for col in categorical_columns:
+    df[f'encoded_{col}'] = encoder.fit_transform(df[col])
 
 ---
 
@@ -67,14 +76,17 @@ df['encoded_column'] = encoder.fit_transform(df['categorical_column'])
 Outliers can be removed using statistical methods like IQR or z-scores.
 
 Example 1: IQR method:
-Q1 = df['column_name'].quantile(0.25)
-Q3 = df['column_name'].quantile(0.75)
-IQR = Q3 - Q1
-df = df[(df['column_name'] >= Q1 - 1.5 * IQR) & (df['column_name'] <= Q3 + 1.5 * IQR)]
+numerical_columns = df.select_dtypes(include=[np.number]).columns
+for col in numerical_columns:
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+    IQR = Q3 - Q1
+    df = df[(df[col] >= Q1 - 1.5 * IQR) & (df[col] <= Q3 + 1.5 * IQR)]
 
 Example 2: Remove rows where z-score exceeds 3:
+numerical_columns = df.select_dtypes(include=[np.number]).columns
 from scipy.stats import zscore
-df = df[(zscore(df['column_name']) < 3)]
+df = df[(zscore(df[numerical_columns]) < 3).all(axis=1)]
 
 ---
 
@@ -82,13 +94,22 @@ df = df[(zscore(df['column_name']) < 3)]
 Convert columns to appropriate data types like datetime, integer, or float for better processing.
 
 Example 1: Convert a column to datetime:
-df['date_column'] = pd.to_datetime(df['date_column'])
+datetime_columns = ['date_column']  # Replace with actual datetime columns
+for col in datetime_columns:
+    if col in df.columns:
+        df[col] = pd.to_datetime(df[col])
 
 Example 2: Convert a column to integer:
-df['int_column'] = df['int_column'].astype(int)
+integer_columns = ['int_column']  # Replace with actual integer columns
+for col in integer_columns:
+    if col in df.columns:
+        df[col] = df[col].astype(int)
 
 Example 3: Convert a column to float:
-df['float_column'] = df['float_column'].astype(float)
+float_columns = ['float_column']  # Replace with actual float columns
+for col in float_columns:
+    if col in df.columns:
+        df[col] = df[col].astype(float)
 
 ---
 
@@ -96,12 +117,16 @@ df['float_column'] = df['float_column'].astype(float)
 Create new features by combining or extracting information from existing ones.
 
 Example 1: Create a new feature by multiplying two columns:
-df['new_feature'] = df['column1'] * df['column2']
+if 'column1' in df.columns and 'column2' in df.columns:
+    df['new_feature'] = df['column1'] * df['column2']
 
 Example 2: Extract year, month, and day from a datetime column:
-df['year'] = df['date_column'].dt.year
-df['month'] = df['date_column'].dt.month
-df['day'] = df['date_column'].dt.day
+datetime_columns = ['date_column']  # Replace with actual datetime columns
+for col in datetime_columns:
+    if col in df.columns:
+        df[f'{col}_year'] = df[col].dt.year
+        df[f'{col}_month'] = df[col].dt.month
+        df[f'{col}_day'] = df[col].dt.day
 
 ---
 
@@ -110,7 +135,7 @@ Unnecessary columns can be dropped to clean the dataset.
 
 Example:
 columns_to_remove = ['column_to_remove1', 'column_to_remove2']
-df.drop(columns=columns_to_remove, inplace=True)
+df.drop(columns=[col for col in columns_to_remove if col in df.columns], inplace=True)
 
 ---
 
@@ -118,7 +143,8 @@ df.drop(columns=columns_to_remove, inplace=True)
 Sort rows by the values of a specific column.
 
 Example:
-df.sort_values(by='column_name', ascending=True, inplace=True)
+if 'column_name' in df.columns:  # Replace with actual column name
+    df.sort_values(by='column_name', ascending=True, inplace=True)
 
 ---
 
@@ -126,7 +152,8 @@ df.sort_values(by='column_name', ascending=True, inplace=True)
 Group data by a column and apply an aggregate function.
 
 Example: Group by a column and calculate the mean:
-grouped_df = df.groupby('group_column')['value_column'].mean().reset_index()
+if 'group_column' in df.columns and 'value_column' in df.columns:  # Replace with actual columns
+    grouped_df = df.groupby('group_column')['value_column'].mean().reset_index()
 
 ---
 

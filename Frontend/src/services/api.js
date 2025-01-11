@@ -52,6 +52,19 @@ export const getColumns = async (file) => {
     }
 };
 
+export const getVisualizations = async (formData) => {    
+    try {
+        const response = await axios.post(`${BASE_URL}/api/dashboard`, formData, { 
+            responseType: 'json', 
+            headers: { 'Content-Type': 'multipart/form-data' }
+         });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching dataset recommendations:", error);
+        throw error;
+    }
+};
+
 export const recommendDatasets = async (query) => {
     try {
         const response = await axios.post(`${BASE_URL}/api/datasets/`, { query });

@@ -1,0 +1,4 @@
+visualizations
+**/__pycache__/
+Backend/routes/.env
+Frontend/node_modules

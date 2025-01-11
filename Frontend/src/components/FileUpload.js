@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { uploadFile } from "../services/api";
 import { getColumns } from "../services/api";
 import { uploadFilePrompt } from "../services/api";
+import { getVisualizations } from "../services/api";
 import {
   Box,
   Button,
@@ -29,7 +30,10 @@ const FileUpload = () => {
   const [file, setFile] = useState(null);
   const [removeNA, setRemoveNA] = useState(true);
   const [columns, setColumns] = useState([]);
+  const [target, setTarget] = useState("");
   const [selectedColumns, setSelectedColumns] = useState([]);
+  const [visualizations, setVisualizations] = useState([]);
+  const [suggestions, setSuggestions] = useState("");
   const [config, setConfig] = useState({
     remove_columns: [],
     missing_values_num: { strategy: "none" },
@@ -100,6 +104,27 @@ const FileUpload = () => {
     }
   };
 
+  const handleUploadWithDashboard = async () => {
+    if (!file || !target) {
+      alert("Please upload a dataset and select a target variable!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("target", target);
+
+    try {
+      const response = await getVisualizations(formData);
+      setVisualizations(response.visualizations || []);
+      setSuggestions(response.suggestions || "No suggestions available.");
+    } catch (error) {
+      alert("Error generating dashboard.");
+      console.error("Dashboard Error:", error);
+    }
+  };
+
+
   const handleUploadWithPrompt = async () => {
     if (!file || !prompt) {
       alert("Please upload a file and provide a prompt!");
@@ -154,6 +179,75 @@ const FileUpload = () => {
               onChange={handleFileChange}
               style={{ marginBottom: "20px" }}
             />
+            {/* Target Variable Selection */}
+            {columns.length > 0 && (
+              <Card elevation={4} style={{ marginTop: "20px" }}>
+                <CardContent>
+                  <Typography variant="h6">Select Target Variable</Typography>
+                  <FormControl fullWidth>
+                    <FormLabel>Target Variable</FormLabel>
+                    <Select
+                      value={target}
+                      onChange={(e) => setTarget(e.target.value)}
+                    >
+                      {columns.map((col) => (
+                        <MenuItem key={col} value={col}>
+                          {col}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </CardContent>
+              </Card>
+            )}
+          </CardContent>
+          </Card>
+
+          {/* Upload and Generate Dashboard Button */}
+          <Card elevation={4}>
+            <CardContent>
+            <Box textAlign="center" marginTop="20px">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleUploadWithDashboard}
+              >
+                Generate Dashboard
+              </Button>
+            </Box>
+
+            {/* Visualizations Section */}
+            {visualizations.length > 0 && (
+              <Box>
+              <Typography variant="h5" gutterBottom>
+                Visualizations
+              </Typography>
+              {visualizations.map((viz, idx) => (
+                <Box key={idx} marginBottom="20px">
+                  <Typography>{viz.name}</Typography>
+                  <img
+                    src={`data:image/png;base64,${viz.image}`}
+                    alt={`Visualization ${viz.name}`}
+                    style={{ width: "100%", height: "auto" }}
+                  />
+                </Box>
+              ))}
+            </Box>
+            )}
+
+            {/* Suggestions Section */}
+            {suggestions && (
+              <Box marginTop="20px">
+                <Typography variant="h5">Preprocessing Suggestions</Typography>
+                <Card>
+                  <CardContent>
+                    <Typography>{suggestions}</Typography>
+                  </CardContent>
+                </Card>
+              </Box>
+            )}
+      
+
             {/* Button to show/hide columns */}
             <Box textAlign="center" marginTop="10px">
               <Button
