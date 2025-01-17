@@ -52,7 +52,7 @@ input[type="radio"] {
 /* Buttons */
 button {
     display: block;
-    width: 100%;
+    width: 40%;
     padding: 12px;
     font-size: 1em;
     background-color: #007bff;
@@ -78,3 +78,31 @@ div.columns {
     border-radius: 5px;
     background-color: #f9f9f9;
 }
+
+.remove-columns-button {
+    background-color: #374aa1; 
+    color: white; 
+    font-weight: bold; 
+    border-radius: 8px; 
+    padding: 10px 20px;
+    width: 20%;
+    text-transform: none; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: background-color 0.3s ease; 
+  }
+  
+  .remove-columns-button:hover {
+    background-color: #e91e63; 
+  }
+
+  .pagination-button{
+    background-color: #374aa1; 
+    color: white; 
+    font-weight: bold;     
+    border-radius: 8px; 
+    padding: 10px 20px;
+    width: 0.5%;
+    text-transform: none; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    transition: background-color 0.3s ease; 
+  }

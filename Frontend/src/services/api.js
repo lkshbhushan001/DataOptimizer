@@ -67,7 +67,7 @@ export const getVisualizations = async (formData) => {
 
 export const recommendDatasets = async (query) => {
     try {
-        const response = await axios.post(`${BASE_URL}/api/datasets/`, { query });
+        const response = await axios.post(`${BASE_URL}/api/datasets/`, { query });        
         return response.data;
     } catch (error) {
         console.error("Error fetching dataset recommendations:", error);

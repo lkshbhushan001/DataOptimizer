@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
@@ -12,8 +12,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 dashboard_blueprint = Blueprint('dashboard', __name__)
-
-# Initialize ChatGroq client
 groq = ChatGroq(api_key=os.getenv('GROQ_API_KEY'))
 
 @dashboard_blueprint.route('/', methods=['POST'])
@@ -24,22 +22,18 @@ def upload_dataset():
     file = request.files['file']
     target = request.form['target']
 
-    try:
-        # Load dataset
+    try:        
         df = pd.read_csv(file)
-
-        # Ensure the target variable exists
+        
         if target not in df.columns:
             return jsonify({"error": "Target variable not found in dataset"}), 400
-
-        # Generate visualizations
+        
         visualization_data = []
         visualizations = generate_visualizations(df, target)
 
         for viz_name, encoded_image in visualizations.items():
             visualization_data.append({"name": viz_name, "image": encoded_image})
-
-        # Data summary and LLM preprocessing suggestions
+        
         suggestions = get_preprocessing_suggestions(df)
 
         return jsonify({
@@ -54,12 +48,10 @@ def upload_dataset():
 def generate_visualizations(df, target):
     visualizations = {}
 
-    try:
-        # Drop rows with missing values in the target variable
+    try:        
         if df[target].isnull().any():
             df = df.dropna(subset=[target])
-
-        # Convert categorical columns to numerical for correlation heatmap
+        
         encoded_df = df.copy()
         label_encoders = {}
         for col in df.select_dtypes(include=['object', 'category']).columns:
@@ -92,7 +84,7 @@ def generate_visualizations(df, target):
                 buffer.close()
                 plt.close()
 
-        # For categorical columns, create bar plots showing the relationship with the target
+        # For categorical columns, bar plots showing the relationship with the target
         for col in df.select_dtypes(include=['object', 'category']).columns:
             if col != target:
                 plt.figure(figsize=(8, 6))
@@ -119,22 +111,18 @@ def generate_visualizations(df, target):
             plt.close()
 
         # Feature importance using RandomForest
-        X = pd.get_dummies(df.drop(columns=[target]), drop_first=True)  # One-hot encode categorical columns
+        X = pd.get_dummies(df.drop(columns=[target]), drop_first=True) 
         y = df[target]
 
         # Check if the target is continuous or categorical
-        if y.dtype == 'object' or y.dtype.name == 'category':
-            # If categorical, use RandomForestClassifier
+        if y.dtype == 'object' or y.dtype.name == 'category':            
             model = RandomForestClassifier(random_state=42)
-        else:
-            # If continuous, use RandomForestRegressor
+        else:            
             model = RandomForestRegressor(random_state=42)
-
-        # Fit the model
+        
         model.fit(X, y)
         importances = pd.Series(model.feature_importances_, index=X.columns).sort_values(ascending=False)
-
-        # Plot feature importance
+        
         plt.figure(figsize=(10, 6))
         sns.barplot(x=importances, y=importances.index)
         plt.title("Feature Importance")
@@ -151,8 +139,7 @@ def generate_visualizations(df, target):
     return visualizations
 
 def get_preprocessing_suggestions(df):
-    try:
-        # Summarize dataset
+    try:        
         summary = f"""
         Dataset contains {df.shape[0]} rows and {df.shape[1]} columns.
         Columns: {', '.join(df.columns)}
@@ -160,13 +147,12 @@ def get_preprocessing_suggestions(df):
         {df.isnull().sum().to_string()}
         Data types:
         {df.dtypes.to_string()}
-        """
-
-        # Construct the prompt
+        """        
         messages = [
             {
                 "role": "system",
-                "content": "You are a Python data preprocessing assistant. Your task is to analyze dataset summaries and provide actionable preprocessing suggestions for data cleaning and preparation."
+                "content": '''You are a Python data preprocessing assistant. Your task is to analyze dataset summaries and provide actionable preprocessing suggestions for data cleaning and preparation.
+                Do not give sample code, but provide clear and concise suggestions for handling missing values, outliers, feature scaling, encoding, and other preprocessing steps specific to the dataset.'''
             },
             {
                 "role": "user",
@@ -177,12 +163,11 @@ def get_preprocessing_suggestions(df):
                 """
             }
         ]
-
-        # Send to ChatGroq for suggestions
+        
         response = groq.chat.completions.create(
             model="llama3-70b-8192",
             messages=messages,
-            max_tokens=500
+            max_tokens=1000
         )
 
         suggestion =  response.choices[0].message.content

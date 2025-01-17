@@ -6,10 +6,6 @@ import {
   TextField,
   Typography,
   Container,
-  List,
-  ListItem,
-  ListItemText,
-  Link,
   CircularProgress,
   Alert,
 } from "@mui/material";
@@ -29,8 +25,8 @@ const DatasetRecommendation = () => {
     setLoading(true);
     setError("");
     try {
-      const data = await recommendDatasets(query);
-      setDatasets(data.datasets);
+      const data = await recommendDatasets(query);      
+      setDatasets(data.datasets  || "No suggestions available.");      
       setLoading(false);
     } catch (error) {
       setError("Error fetching dataset recommendations.");
@@ -40,7 +36,7 @@ const DatasetRecommendation = () => {
 
   return (
     <Box sx={{ minHeight: "100vh", backgroundColor: "#f4f6f8" }}>
-      <Container maxWidth="sm" sx={{ marginTop: 4 }}>
+      <Container maxWidth={false} sx={{ marginTop: 4 }}>
         <Typography variant="h4" align="center" sx={{ marginBottom: 3 }}>
           Dataset Recommendation
         </Typography>
@@ -76,19 +72,78 @@ const DatasetRecommendation = () => {
             <Typography variant="h6" sx={{ marginBottom: 1 }}>
               Recommended Datasets:
             </Typography>
-            <List>
-              {datasets.map((dataset, index) => (
-                <ListItem key={index}>
-                  <ListItemText
-                    primary={
-                      <Link href={dataset.link} target="_blank" rel="noopener noreferrer" variant="h6">
-                        {dataset.name}
-                      </Link>
-                    }
-                  />
-                </ListItem>
-              ))}
-            </List>
+            
+              {/* Parse and format the datasets string */}
+              {datasets.split("\n\n").map((section, sectionIndex) => {
+                // Split each section into lines
+                const lines = section.split("\n");
+
+                return (
+                  <Box key={sectionIndex} sx={{ marginBottom: sectionIndex > 0 ? '16px' : '0' }}>
+                    {lines.map((line, lineIndex) => {
+                      // Handle bold text (content between **)
+                      const boldRegex = /\*\*(.*?)\*\*/g;
+                      const linkRegex = /\[(.*?)\]\((.*?)\)/g;
+
+                      // Check if the line contains a link
+                      if (linkRegex.test(line)) {
+                        return (
+                          <Typography key={lineIndex} paragraph sx={{ marginBottom: '8px' }}>
+                            {line.split(linkRegex).map((part, partIndex) => {
+                              if (partIndex % 3 === 1) {
+                                // Link text
+                                return (
+                                  <a
+                                    key={partIndex}
+                                    href={line.match(linkRegex)[0].match(/\((.*?)\)/)[1]}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{ color: '#1976d2', textDecoration: 'underline' }}
+                                  >
+                                    {part}
+                                  </a>
+                                );
+                              } else if (partIndex % 3 === 2) {
+                                // Link URL (skip rendering)
+                                return null;                                
+                              } 
+                              
+                              else {
+                                // Regular text with bold formatting
+                                return (
+                                  <span key={partIndex}>
+                                    {part.split(boldRegex).map((text, boldIndex) =>
+                                      boldIndex % 2 === 1 ? (
+                                        <strong key={boldIndex}>{text}</strong>
+                                      ) : (
+                                        text
+                                      )
+                                    )}
+                                  </span>
+                                );
+                              }
+                            })}
+                          </Typography>
+                        );
+                      }
+
+                      // Handle bold text only
+                      return (
+                        <Typography key={lineIndex} paragraph sx={{ marginBottom: '8px' }}>
+                          {line.split(boldRegex).map((text, boldIndex) =>
+                            boldIndex % 2 === 1 ? (
+                              <strong key={boldIndex}>{text}</strong>
+                            ) : (
+                              text
+                            )
+                          )}
+                        </Typography>
+                      );
+                    })}
+                  </Box>
+                );
+              })}
+                  
           </Box>
         )}
       </Container>

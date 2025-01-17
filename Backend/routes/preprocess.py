@@ -3,6 +3,7 @@ import pandas as pd
 import os
 import json
 import io
+import ast
 from dotenv import load_dotenv
 from utils.data_cleaning import preprocess_pipeline
 from langchain_groq import ChatGroq
@@ -11,10 +12,7 @@ from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 from langchain.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.prompts import PromptTemplate
-from langchain_core.runnables import RunnablePassthrough as rpt
 from langchain_core.output_parsers import StrOutputParser as sop
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.ensemble import IsolationForest as IF
 
 load_dotenv()
 preprocess_blueprint = Blueprint('preprocess', __name__)
@@ -99,8 +97,8 @@ def process_with_prompt():
         df = pd.read_csv(file)
         vectorstore = get_vector_store()
         retriever = vectorstore.as_retriever(search_type="mmr", search_kwarg = {'k' : 3, 'lambda_mult': 0.7})
-        #retrieved_docs = retriever.get_relevant_documents(prompt)
-        #context = "\n".join([doc.page_content for doc in retrieved_docs])
+        retrieved_docs = retriever.get_relevant_documents(prompt)
+        context = "\n".join([doc.page_content for doc in retrieved_docs])
         
         full_prompt = f"""
         You are a Python data preprocessing assistant. Your task is to generate a Python function named `preprocess` that applies data preprocessing steps to a provided pandas DataFrame, `df`, based on the user’s instructions.
@@ -115,6 +113,12 @@ def process_with_prompt():
         5. Always return the processed DataFrame as `processed_df`.
         6. Always check the data type when implementing the function. For example, if the column is numerical, apply numerical preprocessing methods.
         7. Most Important: Follow the user's instructions precisely and do exactly as asked and include multiple preprocessing steps if required.
+        8. DO NOT INCLUDE ANY PLOTS IN THE CODE NO MATTER WHAT THE USER INSTRUCTIONS ARE. ONLY DATA PREPROCESSING STEPS ARE REQUIRED.
+        9. DO NOT INCLUDE ANY PRINT STATEMENTS IN THE CODE.
+        10. If the user asks for a specific preprocessing step, ensure that you include that step in the code.
+        11. If the code uses the OneHotEncoder function, ensure that the sparse arguement is not passed in the function.
+
+        Use the following context to generate the code: {context}
 
         Input:
         - A pandas DataFrame `df`.
@@ -134,19 +138,22 @@ def process_with_prompt():
         prompt_template = PromptTemplate.from_template(full_prompt)       
 
         chat = ChatGroq(
-            model="llama3-70b-8192",            
+            model="llama-3.3-70b-versatile",            
             model_kwargs = {'seed' : 365},
             temperature = 0.1,
             api_key = os.getenv('GROQ_API_KEY')           
         )
 
-        chain = ({'context': retriever, 'question': rpt()} | prompt_template | chat | sop())
-        code = chain.invoke(prompt)        
-        code = code.replace("```python", "").replace("```", "")        
+        chain = prompt_template | chat | sop()
+        input_dict = {"prompt": prompt}
+        code = chain.invoke(input_dict)        
+        code = code.replace("```python", "").replace("```", "")
         
+        libraries = extract_imports_and_execute(code)
+
         exec_locals = {}
         try:
-            exec(code, {"pd": pd, "StandardScaler": StandardScaler, "MinMaxScaler": MinMaxScaler, "IF" : IF}, exec_locals) 
+            exec(code, libraries, exec_locals) 
         except Exception as e:
             return jsonify({"error": f"Error in executing generated code: {str(e)}"}), 500
 
@@ -163,3 +170,23 @@ def process_with_prompt():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+def extract_imports_and_execute(code):
+    
+    tree = ast.parse(code)    
+    
+    imported_libraries = {}    
+    
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:                
+                imported_libraries[alias.asname or alias.name] = __import__(alias.name)
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module
+            if module:                
+                imported_module = __import__(module, fromlist=[alias.name for alias in node.names])
+                for alias in node.names:
+                    imported_libraries[alias.asname or alias.name] = getattr(imported_module, alias.name)    
+    
+    return imported_libraries
