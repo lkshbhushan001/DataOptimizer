@@ -6,19 +6,11 @@ from routes.dashboard import dashboard_blueprint
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://datapreprocessing.onrender.com"])
 
 app.register_blueprint(preprocess_blueprint, url_prefix='/api/preprocess')
 app.register_blueprint(datasets_blueprint, url_prefix='/api/datasets')
 app.register_blueprint(dashboard_blueprint, url_prefix='/api/dashboard')
 
-front_folder = os.path.join(os.getcwd(), '..', 'frontend', 'build')
-@app.route('/', defaults={"filename": ""})
-@app.route('/<path:filename>')
-def serve(filename):
-    if not filename:
-        filename = "index.html"
-    return send_from_directory(front_folder, filename)
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False) 

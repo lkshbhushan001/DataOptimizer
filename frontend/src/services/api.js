@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const BASE_URL = "https://datapreprocessing_backend.onrender.com";
 
 
 export const uploadFile = async (file, config) => {
@@ -20,10 +20,7 @@ export const uploadFile = async (file, config) => {
     }
 };
 
-export const uploadFilePrompt = async (formData) => {
-    // const formData = new FormData();
-    // formData.append('file', file);
-    // formData.append('config', JSON.stringify(config)); 
+export const uploadFilePrompt = async (formData) => {   
 
     try {
         const response = await axios.post(`${BASE_URL}/api/preprocess/process_with_prompt`, formData, {
