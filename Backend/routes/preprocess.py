@@ -148,7 +148,7 @@ def process_with_prompt():
         input_dict = {"prompt": prompt}
         code = chain.invoke(input_dict)        
         code = code.replace("```python", "").replace("```", "")
-        
+        print(code)
         libraries = extract_imports_and_execute(code)
 
         exec_locals = {}

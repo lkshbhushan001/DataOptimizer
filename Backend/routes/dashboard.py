@@ -49,6 +49,9 @@ def generate_visualizations(df, target):
     visualizations = {}
 
     try:        
+        if not pd.api.types.is_numeric_dtype(df[target]):
+            return {"error": "The target variable should be numerical and not categorical."}
+
         if df[target].isnull().any():
             df = df.dropna(subset=[target])
         
@@ -62,7 +65,7 @@ def generate_visualizations(df, target):
 
         # Correlation heatmap
         plt.figure(figsize=(10, 8))
-        sns.heatmap(encoded_df.corr(), annot=True, cmap='coolwarm', fmt=".2f")
+        sns.heatmap(encoded_df.corr(), annot=False, cmap='coolwarm', fmt=".2f")
         plt.title("Correlation Heatmap")
         buffer = io.BytesIO()
         plt.savefig(buffer, format='png')
