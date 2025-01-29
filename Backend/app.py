@@ -6,8 +6,8 @@ from routes.dashboard import dashboard_blueprint
 import os
 
 app = Flask(__name__)
-frontend_url = os.getenv("FRONTEND_URL", "*")
-CORS(app, origins=["frontend_url"])
+#frontend_url = os.getenv("FRONTEND_URL", "*")
+CORS(app, origins=["https://data-optimizer.vercel.app"])
 
 app.register_blueprint(preprocess_blueprint, url_prefix='/api/preprocess')
 app.register_blueprint(datasets_blueprint, url_prefix='/api/datasets')
