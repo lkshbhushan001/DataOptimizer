@@ -12,7 +12,7 @@ app.register_blueprint(preprocess_blueprint, url_prefix='/api/preprocess')
 app.register_blueprint(datasets_blueprint, url_prefix='/api/datasets')
 app.register_blueprint(dashboard_blueprint, url_prefix='/api/dashboard')
 
-front_folder = os.path.join(os.getcwd(), '..', 'frontend', 'build')
+front_folder = os.path.join(os.getcwd(), '..', 'Frontend', 'build')
 @app.route('/', defaults={"filename": ""})
 @app.route('/<path:filename>')
 def serve(filename):
