@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "https://datapreprocessing_backend.onrender.com";
+const BASE_URL = "https://datapreprocessing.onrender.com";
 
 
 export const uploadFile = async (file, config) => {

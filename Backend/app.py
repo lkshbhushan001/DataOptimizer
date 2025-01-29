@@ -6,7 +6,7 @@ from routes.dashboard import dashboard_blueprint
 import os
 
 app = Flask(__name__)
-CORS(app, origins=["https://datapreprocessing.onrender.com"])
+CORS(app, origins=["https://datapreprocessingapp.onrender.com"])
 
 app.register_blueprint(preprocess_blueprint, url_prefix='/api/preprocess')
 app.register_blueprint(datasets_blueprint, url_prefix='/api/datasets')
